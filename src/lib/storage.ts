@@ -1,3 +1,16 @@
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  orderBy,
+  query,
+  serverTimestamp,
+  Timestamp,
+} from "firebase/firestore";
+import { db } from "./firebase";
+
 export type RsvpStatus = "si" | "no";
 
 export interface Rsvp {
@@ -10,43 +23,43 @@ export interface Rsvp {
   createdAt: string;
 }
 
-const KEY = "quince_rsvps_v1";
+const RSVPS_COLLECTION = "rsvps";
 
-export function getRsvps(): Rsvp[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as Rsvp[]) : [];
-  } catch {
-    return [];
-  }
+export async function getRsvps(): Promise<Rsvp[]> {
+  const q = query(
+    collection(db, RSVPS_COLLECTION),
+    orderBy("createdAt", "desc")
+  );
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map((documento) => {
+    const data = documento.data();
+
+    return {
+      id: documento.id,
+      nombre: data.nombre || "",
+      apellido: data.apellido || "",
+      telefono: data.telefono || "",
+      asistencia: data.asistencia || "si",
+      mensaje: data.mensaje || "",
+      createdAt:
+        data.createdAt instanceof Timestamp
+          ? data.createdAt.toDate().toISOString()
+          : new Date().toISOString(),
+    };
+  });
 }
 
-export function saveRsvp(input: Omit<Rsvp, "id" | "createdAt">): Rsvp {
-  const all = getRsvps();
-  const rsvp: Rsvp = {
+export async function saveRsvp(
+  input: Omit<Rsvp, "id" | "createdAt">
+): Promise<void> {
+  await addDoc(collection(db, RSVPS_COLLECTION), {
     ...input,
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-  };
-  localStorage.setItem(KEY, JSON.stringify([rsvp, ...all]));
-  return rsvp;
+    createdAt: serverTimestamp(),
+  });
 }
 
-export function deleteRsvp(id: string) {
-  const all = getRsvps().filter((r) => r.id !== id);
-  localStorage.setItem(KEY, JSON.stringify(all));
-}
-
-const AUTH_KEY = "quince_admin_auth_v1";
-export const ADMIN_USER = "admin";
-export const ADMIN_PASS = "quince2027";
-
-export function isAdminAuthed(): boolean {
-  if (typeof window === "undefined") return false;
-  return localStorage.getItem(AUTH_KEY) === "1";
-}
-export function setAdminAuthed(v: boolean) {
-  if (v) localStorage.setItem(AUTH_KEY, "1");
-  else localStorage.removeItem(AUTH_KEY);
+export async function deleteRsvp(id: string): Promise<void> {
+  await deleteDoc(doc(db, RSVPS_COLLECTION, id));
 }

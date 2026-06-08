@@ -20,21 +20,29 @@ export function RsvpModal({ trigger }: { trigger: React.ReactNode }) {
   const [done, setDone] = useState(false);
   const [asistencia, setAsistencia] = useState<RsvpStatus>("si");
 
-  const handle = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const nombre = String(fd.get("nombre") || "").trim();
-    const apellido = String(fd.get("apellido") || "").trim();
-    const telefono = String(fd.get("telefono") || "").trim();
-    const mensaje = String(fd.get("mensaje") || "").trim();
-    if (!nombre || !apellido || !telefono) {
-      toast.error("Por favor completá nombre, apellido y teléfono");
-      return;
-    }
-    saveRsvp({ nombre, apellido, telefono, asistencia, mensaje });
+ const handle = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  const fd = new FormData(e.currentTarget);
+  const nombre = String(fd.get("nombre") || "").trim();
+  const apellido = String(fd.get("apellido") || "").trim();
+  const telefono = String(fd.get("telefono") || "").trim();
+  const mensaje = String(fd.get("mensaje") || "").trim();
+
+  if (!nombre || !apellido || !telefono) {
+    toast.error("Por favor completá nombre, apellido y teléfono");
+    return;
+  }
+
+  try {
+    await saveRsvp({ nombre, apellido, telefono, asistencia, mensaje });
     setDone(true);
     toast.success("¡Gracias por confirmar!");
-  };
+  } catch (error) {
+    console.error(error);
+    toast.error("No se pudo enviar la confirmación. Intentá de nuevo.");
+  }
+};
 
   return (
     <Dialog
