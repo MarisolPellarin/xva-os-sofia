@@ -26,6 +26,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Trash2, LogOut, Lock, Download } from "lucide-react";
 import { toast } from "sonner";
 
@@ -134,6 +142,7 @@ type Sort = "recent" | "oldest" | "name";
 function Panel({ onLogout }: { onLogout: () => void }) {
   const navigate = useNavigate();
   const [rsvps, setRsvps] = useState<Rsvp[]>([]);
+  const [selectedRsvp, setSelectedRsvp] = useState<Rsvp | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [sort, setSort] = useState<Sort>("recent");
   const [q, setQ] = useState("");
@@ -141,6 +150,9 @@ function Panel({ onLogout }: { onLogout: () => void }) {
   const refresh = async () => {
     const data = await getRsvps();
     setRsvps(data);
+    setSelectedRsvp((current) =>
+      current ? data.find((item) => item.id === current.id) ?? null : null
+    );
   };
 
   useEffect(() => {
@@ -343,6 +355,63 @@ function Panel({ onLogout }: { onLogout: () => void }) {
           </Button>
         </div>
 
+        <Dialog open={!!selectedRsvp} onOpenChange={(open) => !open && setSelectedRsvp(null)}>
+          <DialogContent>
+            {selectedRsvp && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>Detalle RSVP</DialogTitle>
+                  <DialogDescription>
+                    {selectedRsvp.nombre} {selectedRsvp.apellido}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Nombre</p>
+                    <p className="mt-1 font-medium">
+                      {selectedRsvp.nombre} {selectedRsvp.apellido}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Teléfono</p>
+                    <p className="mt-1 font-medium">{selectedRsvp.telefono}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Asistencia</p>
+                    <p className="mt-1 font-medium capitalize">{selectedRsvp.asistencia}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Fecha</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {new Date(selectedRsvp.createdAt).toLocaleString("es-AR", {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Mensaje</p>
+                  <div className="mt-2 whitespace-pre-line rounded-xl border border-border bg-background p-4 text-sm text-muted-foreground">
+                    {selectedRsvp.mensaje || "—"}
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setSelectedRsvp(null)}>
+                    Cerrar
+                  </Button>
+                </DialogFooter>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+
         <div className="overflow-hidden rounded-xl border border-border bg-card">
           {list.length === 0 ? (
             <div className="p-12 text-center text-muted-foreground">
@@ -363,7 +432,13 @@ function Panel({ onLogout }: { onLogout: () => void }) {
 
               <TableBody>
                 {list.map((r) => (
-                  <TableRow key={r.id}>
+                  <TableRow
+                    key={r.id}
+                    className={`border-b transition-colors hover:bg-muted/50 ${
+                      selectedRsvp?.id === r.id ? "bg-muted/50" : ""
+                    }`}
+                    onClick={() => setSelectedRsvp(r)}
+                  >
                     <TableCell className="font-medium">
                       {r.nombre} {r.apellido}
                     </TableCell>
@@ -402,7 +477,10 @@ function Panel({ onLogout }: { onLogout: () => void }) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(r.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(r.id);
+                        }}
                         aria-label="Eliminar"
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />

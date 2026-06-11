@@ -43,9 +43,9 @@
   --card-foreground: oklch(0.22 0.02 160);
   --popover: oklch(0.99 0.008 90);
   --popover-foreground: oklch(0.22 0.02 160);
-  /* English green */
-  --primary: oklch(0.34 0.06 165);
-  --primary-foreground: oklch(0.97 0.012 90);
+  /* Bordo / Burgundy */
+  --primary: #6f1736;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.93 0.015 120);
   --secondary-foreground: oklch(0.3 0.04 165);
   --muted: oklch(0.94 0.012 100);
@@ -56,7 +56,7 @@
   --destructive-foreground: oklch(0.98 0 0);
   --border: oklch(0.88 0.012 120);
   --input: oklch(0.9 0.012 120);
-  --ring: oklch(0.34 0.06 165);
+  --ring: #6f1736;
   --cream: oklch(0.97 0.015 88);
   --gold: oklch(0.72 0.09 80);
 }
@@ -68,8 +68,8 @@
   --card-foreground: oklch(0.95 0.012 90);
   --popover: oklch(0.22 0.025 160);
   --popover-foreground: oklch(0.95 0.012 90);
-  --primary: oklch(0.55 0.08 165);
-  --primary-foreground: oklch(0.15 0.015 160);
+  --primary: #4b0f20;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.28 0.03 160);
   --secondary-foreground: oklch(0.95 0.012 90);
   --muted: oklch(0.28 0.025 160);
@@ -80,7 +80,7 @@
   --destructive-foreground: oklch(0.98 0 0);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.55 0.08 165);
+  --ring: #4b0f20;
   --cream: oklch(0.22 0.025 160);
   --gold: oklch(0.72 0.09 80);
 }
@@ -114,4 +114,53 @@
   @media (min-width: 640px) {
     .divider-line { width: 3rem; }
   }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@layer utilities {
+  .animate-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+  .animate-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+  }
+  .delay-75 { animation-delay: 75ms; }
+  .delay-150 { animation-delay: 150ms; }
+  .delay-225 { animation-delay: 225ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-375 { animation-delay: 375ms; }
+  .delay-450 { animation-delay: 450ms; }
 }
